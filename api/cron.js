@@ -20,17 +20,21 @@ export default async function handler(req, res) {
     const GROUP_ID = process.env.TARGET_GROUP_ID;
 
     let currentStatus = false;
+    let mcData = null; 
+
     try {
         const mcResponse = await fetch(`https://api.mcstatus.io/v2/status/java/${MC_IP}:${MC_PORT}`);
-        const mcData = await mcResponse.json();
+        mcData = await mcResponse.json();
         currentStatus = mcData.online;
     } catch (e) {
         currentStatus = false;
     }
 
+    // --- 1. Server UP and DOWN Alert ---
     const previousStatus = await redis.get('isServerUp');
+    const stateChanged = currentStatus !== previousStatus;
 
-    if (currentStatus !== previousStatus) {
+    if (stateChanged) {
         if (currentStatus) {
             await sendWhatsAppMessage(GROUP_ID, `✅ *Minecraft Server Alert*\nThe server is now ONLINE! Connect via ${MC_IP}:${MC_PORT}`);
         } else if (previousStatus !== null) { 
@@ -40,5 +44,35 @@ export default async function handler(req, res) {
         await redis.set('isServerUp', currentStatus);
     }
 
-    res.status(200).json({ status: currentStatus ? "UP" : "DOWN", stateChanged: currentStatus !== previousStatus });
+    // --- 2. Player Joined / Left Alert ---
+    let currentPlayers = [];
+    
+    // Only grab names if the server is online and people are playing
+    if (currentStatus && mcData?.players?.list) {
+        currentPlayers = mcData.players.list.map(p => p.name_clean);
+    }
+
+    const oldPlayers = (await redis.get('last_players')) || [];
+
+    // Only broadcast player changes if the server is actively running
+    if (currentStatus) {
+        const joined = currentPlayers.filter(player => !oldPlayers.includes(player));
+        const left = oldPlayers.filter(player => !currentPlayers.includes(player));
+
+        let alertMessage = "";
+        if (joined.length > 0) alertMessage += `🟢 *Joined:* ${joined.join(', ')}\n`;
+        if (left.length > 0) alertMessage += `🔴 *Left:* ${left.join(', ')}\n`;
+
+        if (alertMessage !== "") {
+            await sendWhatsAppMessage(GROUP_ID, `*Player Activity:*\n${alertMessage.trim()}`);
+        }
+    }
+
+    // Always update the latest player list in Redis (saves [] if offline)
+    await redis.set('last_players', currentPlayers);
+
+    res.status(200).json({ 
+        status: currentStatus ? "UP" : "DOWN", 
+        stateChanged: stateChanged 
+    });
 }
