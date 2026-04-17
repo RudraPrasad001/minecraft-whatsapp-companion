@@ -68,7 +68,16 @@ export default async function handler(req, res) {
         }
     }
 
-    // Always update the latest player list in Redis (saves [] if offline)
+    //Playtime Monitoring
+    if (currentStatus && currentPlayers.length > 0) {
+        const pipeline = redis.pipeline();
+        currentPlayers.forEach(player => {
+            pipeline.incrby(`playtime:${player}`, 5);
+        });
+        await pipeline.exec();
+    }
+
+    //Update the latest player list in Redis (saves [] if offline)
     await redis.set('last_players', currentPlayers);
 
     res.status(200).json({ 
