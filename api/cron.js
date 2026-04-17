@@ -72,7 +72,7 @@ export default async function handler(req, res) {
     if (currentStatus && currentPlayers.length > 0) {
         const pipeline = redis.pipeline();
         currentPlayers.forEach(player => {
-            pipeline.incrby(`playtime:${player}`, 5);
+            pipeline.incrby(`playtime:${player}`, 1);
         });
         await pipeline.exec();
     }
