@@ -83,8 +83,8 @@ export default async function handler(req, res) {
         `🟢 *!status* - Check if the server is UP or DOWN and see the current capacity.\n` +
         `🎮 *!players* - Get a live list of everyone currently playing on the server.\n` +
         `🏠 *!ip* - Get the IP Address of the server.\n` +
-        `ℹ️ *!help* - Show this command menu.\n` +
-        `🥇 *!leaderboard* - Show the leaderboard based on Playtime.\n` ;
+        `🥇 *!leaderboard* - Show the leaderboard based on Playtime.\n` +
+        `ℹ️ *!help* - Show this command menu.\n` ;
 
     const greenApiUrl = `https://api.green-api.com/waInstance${process.env.GREEN_API_ID}/sendMessage/${process.env.GREEN_API_TOKEN}`;
     
