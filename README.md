@@ -4,7 +4,7 @@ A lightweight WhatsApp bot that acts as a personal companion for your Minecraft 
 
 ## Features
 * **Automated Alerts:** Checks the server every 5 minutes and sends a message to the group/chat if the status changes (UP/DOWN).
-* **Activity Tracking:** Announces in the chat when players join or leave the server.
+* **Activity Tracking:** Announces in the chat when players join or leave the server (can be muted/unmuted).
 * **Playtime Leaderboard:** Automatically tracks how long players are online and ranks them.
 * **Interactive Commands:** Group/Chat members can use commands to instantly get server IP, player lists, and stats.
 * **Flexible Hosting:** Can be deployed on any serverless platform (like Render, Netlify, Railway) or run on a traditional VPS.
@@ -15,6 +15,7 @@ The bot currently supports the following commands in the WhatsApp group/chat:
 * `!players` - Get a live list of everyone currently playing on the server.
 * `!ip` - Get the IP Address of the server.
 * `!leaderboard` - Show the leaderboard based on Playtime.
+* `!activity off` / `!activity on` - Mute or unmute player join/leave notifications.
 * `!help` - Show the command menu.
 
 ## Tech Stack
